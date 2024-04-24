@@ -39,3 +39,5 @@ docker build -t tks --target production --file docker/Dockerfile .
 # Or run with script
 ./scripts/build.sh
 ```
+
+### How to open dev Container
