@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "tks"
+name = "app1-all [package]"
 version = "0.1.0"
 description = ""
-authors = ["chitchai <chitchaic@gmail.com>"]
+authors = ["newkung6 <newkung_6@hotmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
