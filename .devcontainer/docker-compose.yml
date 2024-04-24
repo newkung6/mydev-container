@@ -1,0 +1,34 @@
+########################################
+# docker-compose file for devcontainer
+########################################
+version: "3.9"
+
+networks:
+  backend:
+
+volumes:
+  vol-vscode-extensions:
+  vol-vscode-insiders-extensions:
+
+services:
+  devcontainer:
+    build:
+      context: ../
+      dockerfile: .devcontainer/Dockerfile.dev
+      target: devcontainer
+    hostname: devcontainer
+    networks:
+      - backend
+    volumes:
+      - ../:/app:cached
+      - vol-vscode-extensions:$HOME/.vscode-server/extensions
+      - vol-vscode-insiders-extensions:$HOME/.vscode-server-insiders/extensions
+
+    # [Optional] Required for ptrace-based debuggers like C++, Go, and Rust
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+
+    command: /bin/sh -c "poetry install --no-dev; tail -f /dev/null"
+

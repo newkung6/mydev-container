@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "app1-all [package]"
+version = "0.1.0"
+description = ""
+authors = ["newkung6 <newkung_6@hotmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pluggy = "^1.0"
+PyYAML = "^6.0"
+PyJWT = "^2.4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

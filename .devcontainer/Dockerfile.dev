@@ -1,0 +1,123 @@
+#########################################################
+# Dockerfile: Build and run Python with non-root user.
+#s########################################################
+ARG APP_PATH=/app
+ARG APP_NAME=tks
+
+ARG PYTHON_VERSION=3.10.5
+ARG POETRY_VERSION=1.1.14
+
+ARG USER_NAME=app
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+
+###########################################################
+# Stage: python-base
+# Creating a python base with shared environment variables
+###########################################################
+FROM python:${PYTHON_VERSION}-slim as python-base
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONFAULTHANDLER=1 \
+    \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100
+
+
+##########################################################
+# Stage: builder-base
+# - Install build tool `poetry` to /opt
+# - Add non-root user
+# - Add bash as interactive shell
+##########################################################
+FROM python-base as builder-base
+
+ARG APP_PATH
+ARG POETRY_VERSION
+ARG POETRY_HOME=/opt/poetry
+ARG USER_NAME
+ARG USER_UID
+ARG USER_GID
+
+ENV PATH="$POETRY_HOME/bin:$PATH"
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        bash \
+        build-essential \
+        curl \
+        sudo
+
+RUN groupadd --gid $USER_GID $USER_NAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USER_NAME -s /bin/bash \
+    && rm -f /home/${USER_NAME}/.bashrc \
+    && echo $USER_NAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER_NAME \
+    && chmod 0440 /etc/sudoers.d/$USER_NAME \
+    \
+    && mkdir -p ${APP_PATH} \
+    && chown -R $USER_NAME $APP_PATH \
+    && chown -R $USER_NAME /opt
+
+USER $USER_NAME
+
+
+# Install poetry.org
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+
+##########################################################
+# Stage: devcontainer for working wit VSCode.
+# Installs all dev deps and can be used to develop code.
+# For example using docker-compose to mount local volume under /app
+##########################################################
+FROM builder-base as devcontainer
+
+ARG POETRY_HOME
+ARG APP_PATH
+ARG USER_NAME
+
+USER root
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        bash-completion \
+        dnsutils \
+        git \
+        gnupg2 \
+        iputils-ping \
+        jq \
+        less \
+        netcat \
+        openssh-client \
+        source-highlight \
+        vim \
+        wget \
+    && curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq \
+    && chmod +x /usr/local/bin/yq
+
+COPY .devcontainer/resources/etc /etc
+
+USER $USER_NAME
+
+ENV PATH="$POETRY_HOME/bin:$APP_PATH/.venv/bin:$PATH"
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_VIRTUALENVS_PATH=.venv \
+    \
+    EDITOR=/usr/bin/vi \
+    LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s" \
+    LESS="-x 2 -R"
+
+
+# Generate poetry bash completion
+RUN poetry completions bash | sudo tee  /etc/bash_completion.d/poetry.bash-completion > /dev/null
+
+WORKDIR $APP_PATH
+
+ENTRYPOINT [ "poetry", "run" ]
+CMD [ "python" ]
+COPY ./poetry.lock ./pyproject.toml ./
+RUN poetry install
+COPY . .
+RUN poetry install
