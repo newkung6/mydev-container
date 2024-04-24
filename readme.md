@@ -5,9 +5,9 @@ Requirement
 
 Container Feature
 - Python3
-- [Poetry](https://python-poetry.org/docs/master/#installing-with-the-official-installer)
+- [Poetry](https://python-poetry.org/docs/)
 
-## how does it work?
+## How does it work?
 Ref : 
 - [Dev-Container](https://code.visualstudio.com/docs/devcontainers/containers)
 - Use devcontainer.json , docker-compose.yml > Dockerfile.dev
@@ -17,11 +17,14 @@ Ref :
 
 # How to use
 ### Clone repo and delete .git & change repo folder
-- ``` git clone https://github.com/newkung6/mydev-container.git```
+
+``` sh
+git clone https://github.com/newkung6/mydev-container.git
+```
 - remove <kbd>mydev-container/.git</kbd>
 - change folder name to new name,project,or repository
 
-### open new workspace on mydev-container(or folder you rename)directory
+### Open new workspace on mydev-container(or folder you rename)directory
 - using vscode with extension 'dev container'
 - <kbd>Ctrl</kbd> + <kbd>shift</kbd> + <kbd>p</kbd> to open vscode command 
 - <kbd>dev container: reopen in container</kbd>
