@@ -1,0 +1,12 @@
+{
+  "dockerComposeFile": ["docker-compose.yml"],
+  "service": "devcontainer",
+  "workspaceFolder": "/app",
+  "extensions": [
+    "ms-python.python",
+    "mhutchie.git-graph"
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "/usr/local/bin/python"
+  }
+}
